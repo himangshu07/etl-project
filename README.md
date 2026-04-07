@@ -23,13 +23,13 @@ It starts with file ingestion and processing, then evolves into a complete data 
 - Multi-cloud upload (AWS S3, Azure Blob, GCP Storage)  
 - Logging & error handling
 
-- **Tech Stack** :
+**Tech Stack** :
 - Python  
 - AWS S3 (boto3)  
 - Azure Blob Storage  
 - Google Cloud Storage
 
-- **How it works**
+**How it works**
 1. Drop file in folder  
 2. Script detects file  
 3. Cleans data  
