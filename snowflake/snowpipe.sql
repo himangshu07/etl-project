@@ -117,3 +117,9 @@ SELECT COUNT(*) FROM RAW_TRANSACTIONS;
 
 -- Check RAW_SHARES
 SELECT COUNT(*) FROM RAW_SHARES;
+
+
+
+-- Note: Snowpipe setup for reference
+-- In Phase 5, loading is triggered via
+-- Stored Procedures (see 07_sp_load_procedures.sql)
