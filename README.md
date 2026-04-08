@@ -7,12 +7,12 @@ It starts with file ingestion and processing, then evolves into a complete data 
 ---
 
 ## Phases
-Phase 1: Folder watcher (Python, file detection, cleaning, multi-cloud upload)  (Done)
-Phase 2: Snowflake setup (database, tables, stages)  (Done)
-Phase 3: Snowpipe setup  
-Phase 4: Streams + Tasks  
-Phase 5: Python pipeline automation  
-⏳ Phase 6: Power BI dashboard  
+- Phase 1: Folder watcher (Python, file detection, cleaning, multi-cloud upload)   
+- Phase 2: Snowflake setup (database, tables, stages)   
+- Phase 3: Snowpipe setup  
+- Phase 4: Streams + Tasks  
+- Phase 5: Python pipeline automation  
+- Phase 6: Power BI dashboard  
 
 ---
 
