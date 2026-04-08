@@ -1,6 +1,6 @@
--- ══════════════════════════════════════
+--
 -- RAW TABLES (daily, truncated after processing)
--- ══════════════════════════════════════
+--
 
 CREATE OR REPLACE TABLE RAW_ACCOUNTS (
   RAW_ID            NUMBER AUTOINCREMENT PRIMARY KEY,
@@ -58,9 +58,9 @@ CREATE OR REPLACE TABLE RAW_SHARES (
 );
 Select * from RAW_SHARES;
 
--- ══════════════════════════════════════
+-- 
 -- BACKUP TABLES (never deleted)
--- ══════════════════════════════════════
+-- 
 
 CREATE OR REPLACE TABLE BACKUP_ACCOUNTS (
   BACKUP_ID         NUMBER AUTOINCREMENT PRIMARY KEY,
@@ -116,9 +116,9 @@ CREATE OR REPLACE TABLE BACKUP_SHARES (
   PROCESSED_TIMESTAMP TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- ══════════════════════════════════════
+--
 -- PRODUCTION TABLES (always latest clean data)
--- ══════════════════════════════════════
+-- 
 
 CREATE OR REPLACE TABLE PROD_ACCOUNTS (
   PROD_ID           NUMBER AUTOINCREMENT PRIMARY KEY,
@@ -169,9 +169,9 @@ CREATE OR REPLACE TABLE PROD_SHARES (
   LAST_REFRESHED    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- ══════════════════════════════════════
+-- 
 -- COMPANY SUMMARY TABLE
--- ══════════════════════════════════════
+-- 
 
 CREATE OR REPLACE TABLE COMPANY_SUMMARY (
   SUMMARY_ID        NUMBER AUTOINCREMENT PRIMARY KEY,

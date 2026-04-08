@@ -9,20 +9,20 @@ from watchdog.events import FileSystemEventHandler
 from azure.storage.blob import BlobServiceClient
 from google.cloud import storage as gcs
 
-# ── SETUP ──────────────────────────────────────────
+# SETUP
 load_dotenv()
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s — %(message)s"
+    format="%(asctime)s - %(levelname)s - %(message)s"
 )
 log = logging.getLogger(__name__)
 
 WATCH_FOLDER = os.path.join(os.path.dirname(__file__), "watch-folder")
 
-# ── FILE CLEANER ───────────────────────────────────
 
+# FILE CLEANER
 def clean_file(file_path, folder):
-    log.info(f"🧹 Cleaning file: {os.path.basename(file_path)}")
+    log.info(f"Cleaning file: {os.path.basename(file_path)}")
 
     try:
         if file_path.endswith(".xlsx") or file_path.endswith(".xls"):
@@ -30,13 +30,13 @@ def clean_file(file_path, folder):
         elif file_path.endswith(".csv"):
             df = pd.read_csv(file_path)
         else:
-            log.warning(f"⚠️ Unsupported file type: {file_path}")
+            log.warning(f"Unsupported file type: {file_path}")
             return False
 
         original_count = len(df)
-        log.info(f"📊 Total rows found: {original_count}")
+        log.info(f"Total rows found: {original_count}")
 
-        # ── CLEANING RULES ─────────────────────────
+        # CLEANING RULES
         df.columns = df.columns.str.strip()
         df.dropna(how="all", inplace=True)
         df.drop_duplicates(inplace=True)
@@ -62,29 +62,28 @@ def clean_file(file_path, folder):
 
         clean_count = len(df)
         removed = original_count - clean_count
-        log.info(f"🗑️  Removed {removed} unwanted rows")
-        log.info(f"✅ Clean rows remaining: {clean_count}")
+        log.info(f"Removed {removed} unwanted rows")
+        log.info(f"Clean rows remaining: {clean_count}")
 
         clean_path = file_path.rsplit(".", 1)[0] + "_clean.csv"
         df.to_csv(clean_path, index=False)
-        log.info(f"💾 Clean file saved: {os.path.basename(clean_path)}")
+        log.info(f"Clean file saved: {os.path.basename(clean_path)}")
 
         return clean_path
 
     except Exception as e:
-        log.error(f"❌ Cleaning failed: {e}")
+        log.error(f"Cleaning failed: {e}")
         return False
 
 
-# ── UPLOAD FUNCTIONS ───────────────────────────────
-
+# UPLOAD FUNCTIONS
 def upload_to_aws(file_path, file_name):
     aws_key = os.getenv("AWS_ACCESS_KEY_ID")
     aws_secret = os.getenv("AWS_SECRET_ACCESS_KEY")
     aws_region = os.getenv("AWS_REGION")
     aws_bucket = os.getenv("AWS_BUCKET_NAME")
 
-    log.info(f"🔑 Using bucket: {aws_bucket} in {aws_region}")
+    log.info(f"Uploading to AWS S3 bucket: {aws_bucket}")
 
     s3 = boto3.client(
         "s3",
@@ -93,7 +92,8 @@ def upload_to_aws(file_path, file_name):
         region_name=aws_region
     )
     s3.upload_file(file_path, aws_bucket, file_name)
-    log.info(f"☁️  AWS S3 → {file_name} uploaded ✅")
+    log.info(f"AWS S3 upload successful: {file_name}")
+
 
 def upload_to_azure(file_path, file_name):
     client = BlobServiceClient.from_connection_string(
@@ -104,7 +104,7 @@ def upload_to_azure(file_path, file_name):
     )
     with open(file_path, "rb") as data:
         container.upload_blob(name=file_name, data=data, overwrite=True)
-    log.info(f"☁️  Azure → {file_name} uploaded ✅")
+    log.info(f"Azure Blob upload successful: {file_name}")
 
 
 def upload_to_gcp(file_path, file_name):
@@ -112,14 +112,14 @@ def upload_to_gcp(file_path, file_name):
         os.getenv("GCP_KEY_FILE")
     )
     bucket_name = os.getenv("GCP_BUCKET_NAME")
-    log.info(f"🔑 GCP Bucket: {bucket_name}")  # ← add this line
+    log.info(f"Uploading to GCP bucket: {bucket_name}")
     bucket = client.bucket(bucket_name)
     blob = bucket.blob(file_name)
     blob.upload_from_filename(file_path)
-    log.info(f"☁️  GCP → {file_name} uploaded ✅")
+    log.info(f"GCP upload successful: {file_name}")
 
-# ── FILE EVENT HANDLER ─────────────────────────────
 
+# FILE EVENT HANDLER
 class FileHandler(FileSystemEventHandler):
 
     def on_created(self, event):
@@ -134,18 +134,16 @@ class FileHandler(FileSystemEventHandler):
             return
 
         if not file_name.endswith((".csv", ".xlsx", ".xls")):
-            log.warning(f"⚠️ Skipping unsupported file: {file_name}")
+            log.warning(f"Skipping unsupported file: {file_name}")
             return
 
-        log.info(f"\n{'='*50}")
-        log.info(f"📁 New file detected: {file_name}")
-        log.info(f"📂 Source folder: {folder}")
+        log.info(f"New file detected: {file_name} in folder: {folder}")
 
         time.sleep(2)
 
         clean_path = clean_file(file_path, folder)
         if not clean_path:
-            log.error("❌ Cleaning failed — upload cancelled")
+            log.error("Cleaning failed - upload cancelled")
             return
 
         clean_name = os.path.basename(clean_path)
@@ -158,22 +156,20 @@ class FileHandler(FileSystemEventHandler):
             elif folder == "gcp":
                 upload_to_gcp(clean_path, clean_name)
             else:
-                log.warning(f"⚠️ Unknown folder: {folder}")
+                log.warning(f"Unknown folder: {folder} - skipping")
                 return
 
-            log.info(f"🎉 Pipeline triggered for: {clean_name}")
-            log.info(f"{'='*50}\n")
+            log.info(f"Pipeline triggered successfully for: {clean_name}")
 
         except Exception as e:
-            log.error(f"❌ Upload failed: {e}")
+            log.error(f"Upload failed: {e}")
 
 
-# ── MAIN ───────────────────────────────────────────
-
+# MAIN
 if __name__ == "__main__":
-    log.info(f"👀 Watching: {WATCH_FOLDER}")
-    log.info("⏳ Drop a file into aws/ azure/ or gcp/ folder...")
-    log.info("Press Ctrl+C to stop\n")
+    log.info(f"Watcher started. Monitoring: {WATCH_FOLDER}")
+    log.info("Waiting for files in aws/ azure/ or gcp/ folder...")
+    log.info("Press Ctrl+C to stop")
 
     observer = Observer()
     observer.schedule(
@@ -188,6 +184,6 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         observer.stop()
-        log.info("🛑 Watcher stopped")
+        log.info("Watcher stopped")
 
     observer.join()
