@@ -126,6 +126,39 @@ python watcher.py
 
 ---
 
+## Phase 5 - Python Pipeline Automation
+
+- Connects to Snowflake using snowflake-connector-python
+- Loads data from all 3 cloud stages into RAW tables
+- Truncates PROD tables before processing (no duplicates)
+- Calls stored procedures to backup and process data
+- Updates Company Summary automatically
+- RAW tables stay till midnight for reprocessing if needed
+- Midnight Task truncates RAW and resets for next day
+- Full logging for every step
+
+**Tech Stack:**
+- Python
+- snowflake-connector-python
+- python-dotenv
+
+**How it works:**
+1. SP_LOAD procedures load files from cloud stages to RAW
+2. PROD tables truncated before fresh load
+3. SP_PROCESS procedures copy RAW to BACKUP and insert to PROD
+4. SP_UPDATE_SUMMARY updates Company Summary
+5. RAW stays all day as safety net
+6. Midnight Task truncates RAW automatically
+
+**Pipeline Steps:**
+- Step 1: Load data from AWS S3, Azure Blob, GCP to RAW tables
+- Step 2: Check RAW row counts
+- Step 3: Truncate PROD tables
+- Step 4: Backup and process to PRODUCTION
+- Step 5: Update Company Summary
+- Step 6: Final row count verification
+- Step 7: Display Company Summary figures
+
 ## Note
 Secrets are stored in `.env` (not pushed to GitHub)
 Snowflake credentials are stored in a private worksheet (not pushed)
