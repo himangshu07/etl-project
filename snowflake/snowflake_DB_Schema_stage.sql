@@ -1,0 +1,38 @@
+CREATE DATABASE ETL_PROJECT_DB;
+
+-- Create schema
+CREATE SCHEMA ETL_PROJECT_DB.FINANCIAL;
+
+-- Use them
+USE DATABASE ETL_PROJECT_DB;
+USE SCHEMA FINANCIAL;
+
+-- Create warehouse
+CREATE WAREHOUSE ETL_PROJECT_WH
+  WAREHOUSE_SIZE = 'X-SMALL'
+  AUTO_SUSPEND = 60
+  AUTO_RESUME = TRUE
+  COMMENT = 'ETL Project Warehouse';
+
+-- AWS Stage
+CREATE OR REPLACE STAGE AWS_STAGE
+  URL = 's3://etl-bucket-hb/'
+  CREDENTIALS = (
+    AWS_KEY_ID = 'your_aws_access_key'
+    AWS_SECRET_KEY = 'your_aws_secret_key'
+  )
+  FILE_FORMAT = CSV_FORMAT;
+
+-- Azure Stage
+CREATE OR REPLACE STAGE AZURE_STAGE
+  URL = 'azure://snowflake.blob.core.windows.net/bucket/'
+  CREDENTIALS = (
+    AZURE_SAS_TOKEN = 'your_sas_token_here'
+  )
+  FILE_FORMAT = CSV_FORMAT;
+
+-- GCP Stage
+CREATE OR REPLACE STAGE GCP_STAGE
+  URL = 'gcs://bucket/'
+  STORAGE_INTEGRATION = GCP_INTEGRATION
+  FILE_FORMAT = CSV_FORMAT;
